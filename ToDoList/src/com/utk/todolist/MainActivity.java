@@ -2,16 +2,21 @@ package com.utk.todolist;
 
 import java.util.ArrayList;
 
+import android.R.integer;
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -19,10 +24,13 @@ public class MainActivity extends Activity {
 	private ListView listView;
 	
 	private ArrayList<String> todoItems = new ArrayList<String>();
+	private ArrayList<Integer> todoIds = new ArrayList<Integer>();
+	
 	private ArrayAdapter<String> aa;
 	
 	private ToDoDBAdapter toDoDBAdapter;
 	private Cursor toDoListCursor;
+	protected ArrayList<String> asas;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +84,24 @@ public class MainActivity extends Activity {
 			
 		});
 		
+		listView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+					long arg3) {
+				// TODO Auto-generated method stub
+				int task_id = todoIds.get(position);
+				String task = todoItems.get(position);
+			
+				Intent intObj = new Intent(MainActivity.this,DeleteActivity.class);
+				intObj.putExtra(DeleteActivity.EXTRA_ID, task_id);
+				
+				intObj.putExtra(DeleteActivity.EXTRA_TASK, task);
+				startActivityForResult(intObj, 0);
+							
+			}
+		});
+		
 	}
 
 	private void populateToDoList() {
@@ -88,19 +114,46 @@ public class MainActivity extends Activity {
 		updateArray();
 		
 	}
+	 @Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		
+		String status;
+		if(requestCode == 0){
+			switch (resultCode) {
+			case RESULT_OK:
+				status = data.getStringExtra("status");
+				Toast.makeText(this, "OK, " + status,Toast.LENGTH_LONG);
+				updateArray();
+				break;
 
+			case RESULT_CANCELED:
+				status = data.getStringExtra("status");
+				Toast.makeText(this, "OK, " + status,Toast.LENGTH_LONG);
+				break;
+			default:
+				break;
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 	private void updateArray() {
 		// TODO Auto-generated method stub
 		toDoListCursor.requery();
 		// Clear item in array list
 		this.todoItems.clear();
+		this.todoIds.clear();
 		
 		// Check is cursor having value by move to first
 		if(toDoListCursor.moveToFirst()){
 				do{
+					int task_id = toDoListCursor.getInt(
+							toDoListCursor.getColumnIndex(ToDoDBAdapter.KEY_ID)
+							);
 					String task = toDoListCursor.getString(
 							toDoListCursor.getColumnIndex(ToDoDBAdapter.KEY_TASK)
 							);
+					todoIds.add(0,task_id);
 					todoItems.add(0,task);
 					
 				}while(toDoListCursor.moveToNext());

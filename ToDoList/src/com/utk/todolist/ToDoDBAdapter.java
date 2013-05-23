@@ -1,5 +1,6 @@
 package com.utk.todolist;
 
+import android.R.bool;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -15,7 +16,7 @@ public class ToDoDBAdapter {
 	private static final int DATABASE_VERSION = 1;
 	
 	// DB Field
-	private static final String KEY_ID = "id";
+	public static final String KEY_ID = "id";
 	public static final String KEY_TASK = "task";
 	
 	// DB Adapter Variable
@@ -53,6 +54,11 @@ public class ToDoDBAdapter {
 		newTaskValues.put(KEY_TASK,task);
 		// insert into database
 		return db.insert(TABLE_NAME,null,newTaskValues);
+	}
+	
+	public boolean deleteByID(int id){
+		// db.delete method always return number of deleted record.
+		return db.delete(this.TABLE_NAME, KEY_ID + "=" + String.valueOf(id), null) > 0;
 	}
 	
 	// Get DB cursor ** retrive data 
